@@ -2,36 +2,37 @@
 
 ## Overview
 
-This project deploys a self-hosted Nextcloud instance on Ubuntu Server using Docker.
+This project automates uploading recordings from a Windows workstation to a self-hosted Nextcloud server.
 
-The application is available only through Nginx Reverse Proxy over HTTPS.
+The uploader continuously monitors a local directory, detects completed recordings and uploads them to Nextcloud using WebDAV.
 
-PostgreSQL is used as the primary database, while Redis provides caching for better performance.
+A watchdog service ensures the uploader is always running and automatically restarts it if the process stops unexpectedly.
 
 ---
 
-## Infrastructure
+## Workflow
 
 ```text
-                 Internet
-                      │
-                   Domain
-                      │
-            Let's Encrypt SSL
-                      │
-                  Nginx
-                      │
-               127.0.0.1:8080
-                      │
-                 Nextcloud
-                  │       │
-             PostgreSQL  Redis
+Recording Software
+        │
+        ▼
+ Local Folder
+        │
+        ▼
+upload-recordings.ps1
+        │
+        ▼
+   WebDAV Upload
+        │
+        ▼
+ Nextcloud Server
+        │
+        ▼
+ Stored in Cloud
 
-             WireGuard VPN
-                    │
-                 wg-easy
-                    │
-              Remote Clients
+        ▲
+        │
+ Watchdog Service
 ```
 
 ---
@@ -40,18 +41,21 @@ PostgreSQL is used as the primary database, while Redis provides caching for bet
 
 | Component | Purpose |
 |-----------|---------|
-| Ubuntu Server | Operating System |
-| Docker | Container Platform |
-| Nextcloud | File Storage |
-| PostgreSQL | Database |
-| Redis | Cache |
-| Nginx | Reverse Proxy |
-| Let's Encrypt | SSL Certificates |
-| WireGuard | Secure Remote Access |
-| wg-easy | VPN Client Management |
+| upload-recordings.ps1 | Upload recordings |
+| install-watchdog.bat | Install watchdog |
+| start-upload.bat | Start uploader |
+| stop-upload.bat | Stop uploader |
+| restart-upload.bat | Restart uploader |
+| Nextcloud | File storage |
+| WebDAV | Upload protocol |
 
 ---
 
-## Network Flow
+## Automation Flow
 
-Internet → Nginx → Docker → Nextcloud → PostgreSQL / Redis
+1. Monitor recording folder.
+2. Detect completed files.
+3. Upload files to Nextcloud.
+4. Verify upload.
+5. Log result.
+6. Continue monitoring.
